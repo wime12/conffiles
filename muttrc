@@ -1,0 +1,52 @@
+source "/home/wilfried/.mutt/solarized-light"
+macro index,pager,generic <f5> "<enter-command>source ~/.mutt/solarized-dark<enter>"
+macro index,pager,generic \e[15\;2~ "<enter-command>source ~/.mutt/solarized-light<enter>"
+
+#source "gpg -q -d ~/.mutt/passwords.gpg |"
+source "pass EMail/mutt |"
+
+# SMTP
+#set imap_user = "wilfried.meindl@gmail.com"
+#unset record
+#set realname = 'Wilfried Meindl'
+#set from = wilfried.meindl@gmail.com
+#set use_from = yes
+
+#set smtp_url=smtps://wilfried.meindl@gmail.com:$smtp_pass@smtp.gmail.com
+#set ssl_force_tls = yes
+#unset ssl_starttls
+
+bind editor <space> noop
+# macro index gi "<change-folder>=INBOX<enter>" "Go to INBOX"
+# macro index ga "<change-folder>=[Gmail]/Alle Nachrichten<enter>" "Go to All Mail"
+# macro index gs "<change-folder>=[Gmail]/Gesendet<enter>" "Go to Sent Mail"
+# macro index gm "<change-folder>=[Gmail]/Markiert<enter>" "Go to flagged"
+
+set mbox_type=Maildir
+set folder="~/Mail"
+set mbox="+archive"
+set record="+sent"
+set postponed="+postponed"
+set move=yes
+set header_cache=~/.cache/mutt
+
+# Threads
+set sort="threads"
+set strict_threads="yes"
+set sort_browser="reverse-date"
+set sort_aux="last-date-received"
+# unset collapse_unread
+bind index - collapse-thread
+bind index _ collapse-all
+set index_format="%?M?+& ?%2M %2e %Z %D %-20.20F (%4c) %s"
+
+# Editor
+# set editor="vim -c 'set spell spelllang=de_20,en_us' -c 'set textwidth=75'"
+set editor="vi -c 'set wraplen=70|1'"
+
+# HTML mail
+auto_view text/html
+alternative_order text/plain text/html
+
+set alias_file=~/.mutt/aliases
+source $alias_file
