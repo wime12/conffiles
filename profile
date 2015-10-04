@@ -27,5 +27,4 @@ CLICOLOR="YES"; export CLICOLOR
 LSCOLORS="ExGxFxdxCxDxDxhbadExEx"; export LSCOLORS
 BROWSER=/usr/local/bin/conkeror; export BROWSER
 
-echo "    pass '$(pass EMail/GMail)'" | cat .fetchmailrc - | fetchmail -s -f - &
-
+fetchmail -s &

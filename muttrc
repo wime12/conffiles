@@ -2,8 +2,7 @@ source "/home/wilfried/.mutt/solarized-light"
 macro index,pager,generic <f5> "<enter-command>source ~/.mutt/solarized-dark<enter>"
 macro index,pager,generic \e[15\;2~ "<enter-command>source ~/.mutt/solarized-light<enter>"
 
-#source "gpg -q -d ~/.mutt/passwords.gpg |"
-source "pass EMail/mutt |"
+source "gpg -dq ~/.password-store/EMail/mutt.gpg |"
 
 # SMTP
 #set imap_user = "wilfried.meindl@gmail.com"
