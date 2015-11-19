@@ -111,6 +111,8 @@ menubar.utils.terminal = terminal -- Set the terminal for applications that requ
 -- {{{ Wibox
 -- Create a textclock widget
 mytextclock = awful.widget.textclock()
+
+-- Create the mailbox widget
 mymailbox = wibox.widget.textbox()
 
 -- Create a wibox for each screen and add it
@@ -446,11 +448,15 @@ client.connect_signal("focus", function(c) c.border_color = beautiful.border_foc
 client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_normal end)
 -- }}}
 
+-- mailbox widget
+
+
 local mailcheck_pid_file="/home/wilfried/.awesome-mailcheck.pid"
 os.execute("daemon -P "..mailcheck_pid_file.." /home/wilfried/.local/libexec/awesome-mailcheck")
 
 awesome.connect_signal("exit", function()
-  io.input(mailcheck_pid_file)
-  local pgid = io.read("*l")
+  local file = io.open(mailcheck_pid_file, "r")
+  local pgid
+  if file then pgid = file:read("*l") end
   os.execute("/bin/kill -- -"..pgid)
 end)
