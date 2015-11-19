@@ -452,7 +452,7 @@ client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_n
 
 
 local mailcheck_pid_file="/home/wilfried/.awesome-mailcheck.pid"
-os.execute("daemon -P "..mailcheck_pid_file.." /home/wilfried/.local/libexec/awesome-mailcheck")
+os.execute("/usr/sbin/daemon -P "..mailcheck_pid_file.." /home/wilfried/.local/libexec/awesome-mailcheck")
 
 awesome.connect_signal("exit", function()
   local file = io.open(mailcheck_pid_file, "r")
