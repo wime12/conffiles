@@ -1,7 +1,9 @@
-application/pdf; zathura %s;
+application/pdf; zathura %s; print=lpr
 text/html; w3m -I %{charset} -T text/html; copiousoutput;
+application/xhtml+xml; w3m -I %{charset} -T text/html; copiousoutput;
 text/html; conkeror -q %s 2>/dev/null >/dev/null; copiousoutput;
-image/jpeg; sxiv %s;
+image/jpeg; sxiv %s
+image/png; sxiv %s
 application/vnd.openxmlformats-officedocument.wordprocessingml.document; libreoffice %s
 video/quicktime; mplayer %s; copiousoutput;
 video/x-flv; mplayer %s; copiousoutput;

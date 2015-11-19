@@ -111,20 +111,7 @@ menubar.utils.terminal = terminal -- Set the terminal for applications that requ
 -- {{{ Wibox
 -- Create a textclock widget
 mytextclock = awful.widget.textclock()
-mygmailwatch = wibox.widget.textbox()
-
-function set_gmail(n)
-  if n > 0 then
-    mygmailwatch:set_markup('<span color="red" weight="bold">MAIL(' .. n .. ')</span>')
-  else
-    mygmailwatch:set_markup('')
-  end
-end
-
-local f = io.open("/home/wilfried/.gmails", "r")
-if f then
-  set_gmail(tonumber(f:read("*line")))
-end
+mymailbox = wibox.widget.textbox()
 
 -- Create a wibox for each screen and add it
 mywibox = {}
@@ -205,7 +192,7 @@ for s = 1, screen.count() do
     -- Widgets that are aligned to the right
     local right_layout = wibox.layout.fixed.horizontal()
     if s == 1 then right_layout:add(wibox.widget.systray()) end
-    right_layout:add(mygmailwatch)
+    right_layout:add(mymailbox)
     right_layout:add(mytextclock)
     right_layout:add(mylayoutbox[s])
 
@@ -458,3 +445,12 @@ end)
 client.connect_signal("focus", function(c) c.border_color = beautiful.border_focus end)
 client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_normal end)
 -- }}}
+
+local mailcheck_pid_file="/home/wilfried/.awesome-mailcheck.pid"
+os.execute("daemon -P "..mailcheck_pid_file.." /home/wilfried/.local/libexec/awesome-mailcheck")
+
+awesome.connect_signal("exit", function()
+  io.input(mailcheck_pid_file)
+  local pgid = io.read("*l")
+  os.execute("/bin/kill -- -"..pgid)
+end)

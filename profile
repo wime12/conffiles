@@ -27,4 +27,10 @@ CLICOLOR="YES"; export CLICOLOR
 LSCOLORS="ExGxFxdxCxDxDxhbadExEx"; export LSCOLORS
 BROWSER=/usr/local/bin/conkeror; export BROWSER
 
+eval $(ssh-agent)
+trap 'test -n "$SSH_AGENT_PID" && eval $(/usr/bin/ssh-agent -k)' 0
+
 fetchmail -s &
+
+# OPAM configuration
+. /home/wilfried/.opam/opam-init/init.sh > /dev/null 2> /dev/null || true

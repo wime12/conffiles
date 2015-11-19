@@ -2,7 +2,7 @@ source "/home/wilfried/.mutt/solarized-light"
 macro index,pager,generic <f5> "<enter-command>source ~/.mutt/solarized-dark<enter>"
 macro index,pager,generic \e[15\;2~ "<enter-command>source ~/.mutt/solarized-light<enter>"
 
-source "gpg -dq ~/.password-store/EMail/mutt.gpg |"
+#source "gpg -dq ~/.password-store/EMail/mutt.gpg |"
 
 # SMTP
 #set imap_user = "wilfried.meindl@gmail.com"
@@ -46,6 +46,11 @@ set editor="vi -c 'set wraplen=70|1'"
 # HTML mail
 auto_view text/html
 alternative_order text/plain text/html
+
+# Printer
+#set print_command=muttprint
+#set print_command="iconv -f UTF-8 -t iso-8859-15 | a2ps -=mail -1 --encoding=iso-8859-15 --medium=A4sl --highlight-level=heavy | lpr"
+set print_command="iconv -f UTF-8 -t iso-8859-15 | a2ps -=mail -1 --encoding=iso-8859-15 --medium=A4sl | lpr"
 
 set alias_file=~/.mutt/aliases
 source $alias_file
