@@ -450,6 +450,32 @@ client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_n
 
 -- mailbox widget
 
+function mailcheck()
+  local file = io.popen("mail -H", "r")
+  if file then
+    local new_mail
+    local unread_mail
+    local line = file:read("*l")
+    if line then
+      line = file:read("*l")
+    else
+      line = ""
+    end
+    if line then
+      new_mail = string.match(line, "(%d+) new")
+      unread_mail = string.match(line, "(%d+) unread")
+    end
+    if (new_mail and tonumber(new_mail) > 0) then
+      mymailbox:set_markup("<span foreground=\"red\" font_size=\"18000\" font_weight=\"bold\">✉</span>")
+    elseif (unread_mail and tonumber(unread_mail) > 0) then
+      mymailbox:set_markup("<span foreground=\"yellow\" font_size=\"18000\">✉</span>")
+    else
+      mymailbox:set_text("")
+    end
+  end
+end
+
+mailcheck()
 
 local mailcheck_pid_file="/home/wilfried/.awesome-mailcheck.pid"
 os.execute("/usr/sbin/daemon -P "..mailcheck_pid_file.." /home/wilfried/.local/libexec/awesome-mailcheck")
