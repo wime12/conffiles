@@ -10,6 +10,7 @@ local beautiful = require("beautiful")
 -- Notification library
 local naughty = require("naughty")
 local menubar = require("menubar")
+require("sysctl")
 
 -- {{{ Error handling
 -- Check if awesome encountered an error during startup and fell back to
@@ -115,6 +116,9 @@ mytextclock = awful.widget.textclock()
 -- Create the mailbox widget
 mymailbox = wibox.widget.textbox()
 
+-- Create the battery widget
+mybatterywidget = wibox.widget.textbox()
+
 -- Create a wibox for each screen and add it
 mywibox = {}
 mypromptbox = {}
@@ -195,6 +199,7 @@ for s = 1, screen.count() do
     local right_layout = wibox.layout.fixed.horizontal()
     if s == 1 then right_layout:add(wibox.widget.systray()) end
     right_layout:add(mymailbox)
+    right_layout:add(mybatterywidget)
     right_layout:add(mytextclock)
     right_layout:add(mylayoutbox[s])
 
@@ -448,7 +453,7 @@ client.connect_signal("focus", function(c) c.border_color = beautiful.border_foc
 client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_normal end)
 -- }}}
 
--- mailbox widget
+-- Mailbox
 
 function mailcheck()
   local file = io.popen("mail -H", "r")
@@ -466,9 +471,9 @@ function mailcheck()
       unread_mail = string.match(line, "(%d+) unread")
     end
     if (new_mail and tonumber(new_mail) > 0) then
-      mymailbox:set_markup("<span foreground=\"red\" font_size=\"18000\" font_weight=\"bold\">✉</span>")
+      mymailbox:set_markup("<span foreground=\"red\" font_size=\"18000\" font_weight=\"bold\"> ✉</span>")
     elseif (unread_mail and tonumber(unread_mail) > 0) then
-      mymailbox:set_markup("<span foreground=\"yellow\" font_size=\"18000\">✉</span>")
+      mymailbox:set_markup("<span foreground=\"yellow\" font_size=\"18000\"> ✉</span>")
     else
       mymailbox:set_text("")
     end
@@ -486,3 +491,36 @@ awesome.connect_signal("exit", function()
   if file then pgid = file:read("*l") end
   os.execute("/bin/kill -- -"..pgid)
 end)
+
+-- Battery
+
+function show_battery_state()
+  local life = sysctl.get("hw.acpi.battery.life")
+  local state = sysctl.get("hw.acpi.battery.state")
+  local time = sysctl.get("hw.acpi.battery.time")
+  local state_symbol, battery_symbol, color
+  if state == 2 then
+    state_symbol = "↑"
+  elseif state == 1 then
+    state_symbol = "↓"
+  else state_symbol = ""
+  end
+  if life <= 12 then battery_symbol = "▁"; color = "red"
+  elseif life <= 25 then battery_symbol = "▂"; color = "yellow"
+  elseif life <= 37 then battery_symbol = "▃"; color = "lightgreen"
+  elseif life <= 50 then battery_symbol = "▄"; color = "lightgreen"
+  elseif life <= 62 then battery_symbol = "▅"; color = "lightgreen"
+  elseif life <= 75 then battery_symbol = "▆"; color = "lightgreen"
+  elseif life <= 87 then battery_symbol = "▇"; color = "lightgreen"
+  else battery_symbol = "█"; color = "lightgreen"
+  end
+  mybatterywidget:set_markup("<span foreground=\""..color.."\">  "..battery_symbol..state_symbol.."</span>")
+end
+
+show_battery_state()
+
+battery_timer = timer({ timeout = 10 })
+battery_timer:connect_signal("timeout", function()
+  show_battery_state()
+end)
+battery_timer:start()
