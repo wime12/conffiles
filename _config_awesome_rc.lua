@@ -119,6 +119,9 @@ mymailbox = wibox.widget.textbox()
 -- Create the battery widget
 mybatterywidget = wibox.widget.textbox()
 
+-- Create the keyboard widget
+mykeyboardwidget = wibox.widget.textbox()
+
 -- Create a wibox for each screen and add it
 mywibox = {}
 mypromptbox = {}
@@ -200,6 +203,7 @@ for s = 1, screen.count() do
     if s == 1 then right_layout:add(wibox.widget.systray()) end
     right_layout:add(mymailbox)
     right_layout:add(mybatterywidget)
+    right_layout:add(mykeyboardwidget)
     right_layout:add(mytextclock)
     right_layout:add(mylayoutbox[s])
 
@@ -280,7 +284,9 @@ globalkeys = awful.util.table.join(
                   awful.util.getdir("cache") .. "/history_eval")
               end),
     -- Menubar
-    awful.key({ modkey }, "p", function() menubar.show() end)
+    awful.key({ modkey }, "p", function() menubar.show() end),
+    -- Keyboard
+    awful.key({ modkey }, ".", function() switch_kbd() end)
 )
 
 clientkeys = awful.util.table.join(
@@ -471,9 +477,9 @@ function mailcheck()
       unread_mail = string.match(line, "(%d+) unread")
     end
     if (new_mail and tonumber(new_mail) > 0) then
-      mymailbox:set_markup("<span foreground=\"red\" font_size=\"18000\" font_weight=\"bold\"> ✉</span>")
+      mymailbox:set_markup("<span foreground=\"red\" font_size=\"16000\" font_weight=\"bold\"> ✉</span>")
     elseif (unread_mail and tonumber(unread_mail) > 0) then
-      mymailbox:set_markup("<span foreground=\"yellow\" font_size=\"18000\"> ✉</span>")
+      mymailbox:set_markup("<span foreground=\"yellow\" font_size=\"16000\"> ✉</span>")
     else
       mymailbox:set_text("")
     end
@@ -524,3 +530,21 @@ battery_timer:connect_signal("timeout", function()
   show_battery_state()
 end)
 battery_timer:start()
+
+-- Keyboard
+
+
+kbd_state = 1
+function switch_kbd()
+    if kbd_state == 1 then
+	os.execute("/usr/local/bin/setxkbmap de -option compose:menu")
+	mykeyboardwidget:set_markup(" <span font_weight=\"bold\">DE</span>")
+	kbd_state = 0
+    else
+	os.execute("/usr/local/bin/setxkbmap us -option compose:menu")
+	mykeyboardwidget:set_markup(" <span font_weight=\"bold\">US</span>")
+	kbd_state = 1
+    end
+end
+
+switch_kbd()
