@@ -520,7 +520,7 @@ function show_battery_state()
   elseif life <= 87 then battery_symbol = "▇"; color = "lightgreen"
   else battery_symbol = "█"; color = "lightgreen"
   end
-  mybatterywidget:set_markup("<span foreground=\""..color.."\">  "..battery_symbol..state_symbol.."</span>")
+  mybatterywidget:set_markup("  <span foreground=\""..color.."\">"..battery_symbol..state_symbol.."</span>")
 end
 
 show_battery_state()
