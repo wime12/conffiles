@@ -477,9 +477,9 @@ function mailcheck()
       unread_mail = string.match(line, "(%d+) unread")
     end
     if (new_mail and tonumber(new_mail) > 0) then
-      mymailbox:set_markup("<span foreground=\"red\" font_size=\"16000\" font_weight=\"bold\"> ✉</span>")
+      mymailbox:set_markup(" <span foreground=\"red\" font_size=\"16000\" font_weight=\"bold\">✉</span>")
     elseif (unread_mail and tonumber(unread_mail) > 0) then
-      mymailbox:set_markup("<span foreground=\"yellow\" font_size=\"16000\"> ✉</span>")
+      mymailbox:set_markup(" <span foreground=\"yellow\" font_size=\"16000\">✉</span>")
     else
       mymailbox:set_text("")
     end
@@ -520,7 +520,7 @@ function show_battery_state()
   elseif life <= 87 then battery_symbol = "▇"; color = "lightgreen"
   else battery_symbol = "█"; color = "lightgreen"
   end
-  mybatterywidget:set_markup("  <span foreground=\""..color.."\">"..battery_symbol..state_symbol.."</span>")
+  mybatterywidget:set_markup(" <span foreground=\""..color.."\">"..battery_symbol..state_symbol.."</span>")
 end
 
 show_battery_state()
