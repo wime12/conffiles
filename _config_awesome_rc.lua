@@ -1,3 +1,17 @@
+-- Find our virtual terminal
+vtfd = io.popen("/home/wilfried/.local/libexec/chvt")
+local virtual_terminal
+
+if vtfd then
+  virtual_terminal = vtfd:read("*l")
+end
+
+vtfd:close()
+
+-- Get Display Number
+
+display_string=os.getenv("DISPLAY")
+
 -- Standard awesome library
 local gears = require("gears")
 local awful = require("awful")
@@ -11,6 +25,9 @@ local beautiful = require("beautiful")
 local naughty = require("naughty")
 local menubar = require("menubar")
 require("sysctl")
+
+-- get cache directory
+local xdg_cache_dir=awful.util.getdir("cache")
 
 -- {{{ Error handling
 -- Check if awesome encountered an error during startup and fell back to
@@ -122,6 +139,18 @@ mybatterywidget = wibox.widget.textbox()
 -- Create the keyboard widget
 mykeyboardwidget = wibox.widget.textbox()
 
+-- Create the panning widget
+mypanningwidget = wibox.widget.textbox()
+
+-- Create the volume widget
+myvolumewidget = wibox.widget.textbox()
+
+-- Create the net widget
+mynetwidget = wibox.widget.textbox()
+
+-- Create the weather widget
+myweatherwidget = wibox.widget.textbox()
+
 -- Create a wibox for each screen and add it
 mywibox = {}
 mypromptbox = {}
@@ -201,10 +230,14 @@ for s = 1, screen.count() do
     -- Widgets that are aligned to the right
     local right_layout = wibox.layout.fixed.horizontal()
     if s == 1 then right_layout:add(wibox.widget.systray()) end
+    right_layout:add(myweatherwidget)
     right_layout:add(mymailbox)
+    right_layout:add(mynetwidget)
+    right_layout:add(myvolumewidget)
     right_layout:add(mybatterywidget)
     right_layout:add(mykeyboardwidget)
     right_layout:add(mytextclock)
+    right_layout:add(mypanningwidget)
     right_layout:add(mylayoutbox[s])
 
     -- Now bring it all together (with the tasklist in the middle)
@@ -472,14 +505,15 @@ function mailcheck()
     else
       line = ""
     end
+    file:close()
     if line then
       new_mail = string.match(line, "(%d+) new")
       unread_mail = string.match(line, "(%d+) unread")
     end
     if (new_mail and tonumber(new_mail) > 0) then
-      mymailbox:set_markup(" <span foreground=\"red\" font_size=\"16000\" font_weight=\"bold\">✉</span>")
+      mymailbox:set_markup(" <span foreground=\"red\" rise='500' font_size=\"17000\" font_weight=\"bold\">✉</span>")
     elseif (unread_mail and tonumber(unread_mail) > 0) then
-      mymailbox:set_markup(" <span foreground=\"yellow\" font_size=\"16000\">✉</span>")
+      mymailbox:set_markup(" <span foreground=\"yellow\" rise='500' font_size=\"17000\">✉</span>")
     else
       mymailbox:set_text("")
     end
@@ -488,15 +522,27 @@ end
 
 mailcheck()
 
-local mailcheck_pid_file="/home/wilfried/.awesome-mailcheck.pid"
-os.execute("/usr/sbin/daemon -P "..mailcheck_pid_file.." /home/wilfried/.local/libexec/awesome-mailcheck")
+-- Utility Functions
 
-awesome.connect_signal("exit", function()
-  local file = io.open(mailcheck_pid_file, "r")
-  local pgid
-  if file then pgid = file:read("*l") end
-  os.execute("/bin/kill -- -"..pgid)
-end)
+function bar_symbol(n)
+    if     n <= 12 then return "▁"
+    elseif n <= 25 then return "▂"
+    elseif n <= 37 then return "▃"
+    elseif n <= 50 then return "▄"
+    elseif n <= 62 then return "▅"
+    elseif n <= 75 then return "▆"
+    elseif n <= 87 then return "▇"
+    else                return "█"
+    end
+end
+
+function symbol_color(n)
+    if     n <= 12 then return "red"
+    elseif n <= 25 then return "yellow"
+    else                return "lightgreen"
+    end
+end
+
 
 -- Battery
 
@@ -511,16 +557,11 @@ function show_battery_state()
     state_symbol = "↓"
   else state_symbol = ""
   end
-  if life <= 12 then battery_symbol = "▁"; color = "red"
-  elseif life <= 25 then battery_symbol = "▂"; color = "yellow"
-  elseif life <= 37 then battery_symbol = "▃"; color = "lightgreen"
-  elseif life <= 50 then battery_symbol = "▄"; color = "lightgreen"
-  elseif life <= 62 then battery_symbol = "▅"; color = "lightgreen"
-  elseif life <= 75 then battery_symbol = "▆"; color = "lightgreen"
-  elseif life <= 87 then battery_symbol = "▇"; color = "lightgreen"
-  else battery_symbol = "█"; color = "lightgreen"
-  end
-  mybatterywidget:set_markup(" <span foreground=\""..color.."\">"..battery_symbol..state_symbol.."</span>")
+  mybatterywidget:set_markup(" <span rise='1500' foreground='" ..
+			      symbol_color(life) ..
+			      "'>" ..
+			      bar_symbol(life) .. state_symbol ..
+			      "</span>")
 end
 
 show_battery_state()
@@ -533,8 +574,7 @@ battery_timer:start()
 
 -- Keyboard
 
-
-kbd_state = 1
+kbd_state = 0
 function switch_kbd()
     if kbd_state == 1 then
 	os.execute("/usr/local/bin/setxkbmap de -option compose:menu")
@@ -548,3 +588,124 @@ function switch_kbd()
 end
 
 switch_kbd()
+
+-- Panning
+
+local panning_file_name = xdg_cache_dir.."/awesome-panning-vt"..virtual_terminal
+local panning_state = 0
+
+local panning_file = io.open(panning_file_name)
+if panning_file then
+    panning_state = panning_file:read("*l")
+    panning_file:close()
+    if panning_state then
+	panning_state = tonumber(panning_state)
+	if panning_state < 0 and panning_state > 2 then
+	    panning_state = 0
+	end
+    end
+end
+
+function set_panning(n)
+  if n == 0 then
+    os.execute("xrandr --output LVDS1 --mode 1024x600 --panning 1024x600 --scale 1x1")
+  elseif n == 1 then
+    os.execute("xrandr --output LVDS1 --fb 1024x768 --mode 1024x600 --panning 1024x768 --scale 1x1.28")
+  else
+    os.execute("xrandr --output LVDS1 --mode 1024x600 --panning 1024x768 --scale 1x1")
+  end
+end
+
+function display_panning(n)
+    local panning_symbol
+    if n == 0 then
+	-- panning_symbol = "☐"
+	panning_symbol = nil
+    elseif n == 1 then
+        -- panning_symbol = "↨"
+        panning_symbol = "T"
+    else
+        -- panning_symbol = "↡"
+        panning_symbol = "P"
+    end
+    if panning_symbol then
+	mypanningwidget:set_markup("<span font_weight='bold'>"..panning_symbol.." </span>")
+    else
+	mypanningwidget:set_text("")
+    end
+end
+
+function cycle_panning(vt)
+  if tonumber(vt) ~= tonumber(virtual_terminal) then return end
+  panning_state = (panning_state + 1) % 3
+  set_panning(panning_state)
+  display_panning(panning_state)
+  panning_file = io.open(panning_file_name, "w")
+  if panning_file then
+    panning_file:write(tostring(panning_state))
+    panning_file:close()
+  end
+end
+
+set_panning(panning_state)
+display_panning(panning_state)
+
+-- Volume
+
+function update_volume()
+    local volume_file = io.popen("mixer -s vol")
+    local volume_string
+    if volume_file then
+	volume_string = volume_file:read("*l")
+	volume_file:close()
+    end
+    local left, right = string.match(volume_string, "vol (%d+):(%d+)")
+    left = tonumber(left)
+    right = tonumber(right)
+    myvolumewidget:set_markup(" <span rise='1500'" ..
+			      ((left == 100) and " color='white'" or "") ..
+			      ">" ..
+			      ((left > 0) and bar_symbol(left) or "☒") ..
+			      "</span><span rise='1500'" ..
+			      ((right == 100) and " color='white'" or "") ..
+			      ">" ..
+			      ((right > 0) and bar_symbol(right) or "☒") ..
+			      "</span> ")
+end
+
+update_volume()
+
+volume_timer = timer({ timeout = 10 })
+volume_timer:connect_signal("timeout", function()
+  update_volume()
+end)
+volume_timer:start()
+
+-- Net
+
+function show_net_state()
+    local lagg_state = sysctl.get("net.link.lagg.0.active")
+    local wlan_state = sysctl.get("dev.acpi_asus_wmi.0.wlan")
+    local state_symbol
+    if lagg_state == 0 then
+	state_symbol = "⛌"
+    elseif lagg_state == 1 and wlan_state == 1 then
+	state_symbol = "★"
+    else state_symbol = "⚉"
+    end
+    mynetwidget:set_markup(" <span rise='1000' font_size='13000'>"..state_symbol.."</span>")
+end
+
+show_net_state()
+
+-- Start Monitor
+
+local monitor_pid_file="/home/wilfried/.awesome-monitor-"..display_string..".pid"
+os.execute("/usr/sbin/daemon -P "..monitor_pid_file.." /home/wilfried/.local/libexec/awesome-monitor")
+
+awesome.connect_signal("exit", function()
+  local file = io.open(monitor_pid_file, "r")
+  local pgid
+  if file then pgid = file:read("*l") end
+  os.execute("/bin/kill -- -"..pgid)
+end)

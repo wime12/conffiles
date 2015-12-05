@@ -3,6 +3,7 @@ xrdb ~/.Xresources
 #urxvtd -q -f -o &
 # setxkbmap -layout de
 #eval $(ssh-agent)
+#export XSESSION_ID=$(uuidgen)
 exec awesome
 #exec Lumina-DE
 #exec ck-launch-session gnome-session
