@@ -27,8 +27,9 @@ CLICOLOR="YES"; export CLICOLOR
 LSCOLORS="ExGxFxdxCxDxDxhbadExEx"; export LSCOLORS
 BROWSER=/usr/local/bin/conkeror; export BROWSER
 
+trap '. $HOME/.mksh_logout; exit 0' 0
+
 eval $(ssh-agent) >/dev/null
-trap 'test -n "$SSH_AGENT_PID" && eval $(/usr/bin/ssh-agent -k)' 0
 
 fetchmail -d 300 2>/dev/null
 

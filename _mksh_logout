@@ -1,0 +1,10 @@
+#/bin/sh
+
+# Stop the SSH agent
+test -n "$SSH_AGENT_PID" && eval $(/usr/bin/ssh-agent -k)
+
+# Stop fetchmail
+logins=$(who | grep "$USER" | wc -l)
+if [ $logins = 1 ]; then
+    fetchmail -q
+fi
