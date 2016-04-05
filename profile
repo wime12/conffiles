@@ -26,12 +26,14 @@ if [ -x /usr/games/fortune ] ; then /usr/games/fortune freebsd-tips ; fi
 CLICOLOR="YES"; export CLICOLOR
 LSCOLORS="ExGxFxdxCxDxDxhbadExEx"; export LSCOLORS
 BROWSER=/usr/local/bin/conkeror; export BROWSER
+MPD_HOST=/var/mpd/socket; export MPD_HOST
 
 trap '. $HOME/.mksh_logout; exit 0' 0
 
 eval $(ssh-agent) >/dev/null
+export SSH_ASKPASS=/usr/local/bin/ssh-askpass
 
 fetchmail -d 300 2>/dev/null
 
 # OPAM configuration
-. /home/wilfried/.opam/opam-init/init.sh > /dev/null 2> /dev/null || true
+#. /home/wilfried/.opam/opam-init/init.sh > /dev/null 2> /dev/null || true

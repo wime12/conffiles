@@ -1,6 +1,7 @@
 Xcursor.theme: 		whiteglass
 Xcursor.size: 		16
 
+Xft.dpi:		118
 Xft.rbga:		none
 Xft.hinting:		full
 Xft.autohint:		false
@@ -8,20 +9,38 @@ Xft.hintstyle:		hintfull
 
 *utf8:			1
 
-XTerm*faceName:		xft:Inconsolata\ for\ Powerline:pixelsize=16:hinting=true
+!! gv
+gv*font: -*-helvetica-bold-r-normal--*-90-*-*-*-*-*-*
+gv*dpi:	118
+
+!! Xaw
+*beNiceToColormap:	False
+*shapeStyle:		Rectangle
+*Text.BorderWidth:	0
+*SimpleMenu.BorderWidth:	0
+*Paned.internalBorderWidth:	0
+
+
+!! XTerm
+
+XTerm*faceName:		xft:Inconsolata\ for\ Powerline:pixelsize=15:hinting=true
 XTerm*termName:		xterm-256color
 XTerm*locale:		true
+
+!! URxvt
 
 URxvt.saveLines:	1000
 URxvt.scrollBar:	false
 URxvt.secondaryScroll:	true
-URxvt.font:		xft:Inconsolata\ for\ Powerline:pixelsize=16:hinting=full
-!!URxvt.letterSpace:	0
+URxvt.font:		xft:Inconsolata\ for\ Powerline:pixelsize=15:hinting=full
+URxvt.letterSpace:	-1
 
 URxvt.perl-ext-common:	default,matcher
 URxvt.url-launcher:	/usr/local/bin/conkeror
 URxvt.matcher.button:	1
 URxvt.intensityStyles:	false
+
+!! Solarized Color Scheme
 
 !! drop in Solarized colorscheme for Xresources/Xdefaults
 

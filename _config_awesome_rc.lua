@@ -59,7 +59,7 @@ end
 beautiful.init("/home/wilfried/.themes/awesome-theme/theme.lua")
 
 -- This is used later as the default terminal and editor to run.
-terminal = "xterm"
+terminal = "urxvtc"
 editor = os.getenv("EDITOR") or "nano"
 editor_cmd = terminal .. " -e " .. editor
 
@@ -577,7 +577,7 @@ battery_timer:start()
 kbd_state = 0
 function switch_kbd()
     if kbd_state == 1 then
-	os.execute("/usr/local/bin/setxkbmap de -option compose:menu")
+	os.execute("/usr/local/bin/setxkbmap de T3 -option compose:menu")
 	mykeyboardwidget:set_markup(" <span font_weight=\"bold\">DE</span>")
 	kbd_state = 0
     else
@@ -610,7 +610,8 @@ function set_panning(n)
   if n == 0 then
     os.execute("xrandr --output LVDS1 --mode 1024x600 --panning 1024x600 --scale 1x1")
   elseif n == 1 then
-    os.execute("xrandr --output LVDS1 --fb 1024x768 --mode 1024x600 --panning 1024x768 --scale 1x1.28")
+    -- os.execute("xrandr --output LVDS1 --fb 1024x768 --mode 1024x600 --panning 1024x768 --scale 1x1.28")
+    os.execute("xrandr --output LVDS1 --fb 1311x768 --mode 1024x600 --panning 1311x768 --scale 1.28x1.28")
   else
     os.execute("xrandr --output LVDS1 --mode 1024x600 --panning 1024x768 --scale 1x1")
   end
@@ -684,14 +685,26 @@ volume_timer:start()
 -- Net
 
 function show_net_state()
-    local lagg_state = sysctl.get("net.link.lagg.0.active")
-    local wlan_state = sysctl.get("dev.acpi_asus_wmi.0.wlan")
-    local state_symbol
-    if lagg_state == 0 then
-	state_symbol = "⛌"
-    elseif lagg_state == 1 and wlan_state == 1 then
+    local file = io.popen("ifconfig lagg0")
+    local active_interface
+    if file then
+        local line = file:read("*l")
+	while line and not active_interface do
+	    active_interface = string.match(line, "laggport: (%w+) .*ACTIVE.*")
+	    if active_interface then
+		print(active_interface)
+	    end
+	    line = file:read("*l")
+	end
+	file:close()
+    end
+    print(active_interface)
+    if active_interface == "alc0" then
+	state_symbol = "⚉"
+    elseif active_interface == "wlan0" then
 	state_symbol = "★"
-    else state_symbol = "⚉"
+    else
+	state_symbol = "⛌"
     end
     mynetwidget:set_markup(" <span rise='1000' font_size='13000'>"..state_symbol.."</span>")
 end

@@ -3,5 +3,5 @@
 # see login.conf(5)
 #
 me:\
-	:charset=ISO8859-15:\
+	:charset=UTF-8:\
 	:lang=de_DE.UTF-8:

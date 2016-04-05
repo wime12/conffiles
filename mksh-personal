@@ -18,3 +18,9 @@ PERL_MM_OPT="INSTALL_BASE=/home/wilfried/perl5"; export PERL_MM_OPT;
 
 # Terminal
 TERM=xterm-256color
+
+# SSH
+alias ssh='ssh-add -l >/dev/null || ssh-add && unalias ssh; ssh'
+
+# Disable logout by Ctrl-D
+set -o ignoreeof
