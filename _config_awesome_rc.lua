@@ -691,14 +691,10 @@ function show_net_state()
         local line = file:read("*l")
 	while line and not active_interface do
 	    active_interface = string.match(line, "laggport: (%w+) .*ACTIVE.*")
-	    if active_interface then
-		print(active_interface)
-	    end
 	    line = file:read("*l")
 	end
 	file:close()
     end
-    print(active_interface)
     if active_interface == "alc0" then
 	state_symbol = "⚉"
     elseif active_interface == "wlan0" then
